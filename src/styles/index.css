@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Inter font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@layer base {
+  html, body {
+    @apply bg-gray-50 text-gray-900 font-sans antialiased;
+  }
+}
+
+@layer components {
+  .input-field {
+    @apply w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-impactTurquoise focus:border-transparent transition-all duration-300 ease-in-out bg-white shadow-sm;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 bg-white text-impactTurquoise border border-impactTurquoise rounded-lg shadow-md hover:bg-impactTurquoise hover:text-white transition duration-300 ease-in-out font-semibold;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-white text-gray-700 font-semibold rounded-lg border border-gray-300 hover:bg-gray-50 transition duration-300 ease-in-out;
+  }
+  
+  .chat-bubble-ai {
+    @apply bg-white p-3 rounded-xl max-w-md px-4 py-2 my-1 shadow self-start text-gray-800;
+  }
+
+  .chat-bubble-user {
+    @apply bg-impactTurquoise p-3 rounded-xl max-w-md px-4 py-2 my-1 shadow self-end text-white;
+  }
+}
+
+/* Ensure scrollbars are hidden but functionality remains */
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Fonts importeren */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+html, body {
+  @apply bg-white text-gray-800 font-sans;
+}
+
+input, textarea, button {
+  @apply rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-iqgreen text-sm;
+}
+
+button {
+  @apply transition-colors duration-200 ease-in-out;
+}
+
+button:hover {
+  @apply bg-iqgreen text-white;
+}
