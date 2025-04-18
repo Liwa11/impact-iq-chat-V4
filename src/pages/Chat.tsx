@@ -310,7 +310,17 @@ export default function Chat() {
                   : "bg-white text-gray-800 self-start mr-auto"
               }`}
             >
-              {msg.content}
+              <div className="whitespace-pre-wrap">
+  {msg.content.split("```").map((block, i) =>
+    i % 2 === 1 ? (
+      <pre key={i} className="bg-gray-100 text-sm p-3 rounded-md overflow-auto text-black font-mono mb-2">
+        {block.trim()}
+      </pre>
+    ) : (
+      <span key={i}>{block}</span>
+    )
+  )}
+</div>
             </div>
           ))}
           <div ref={chatEndRef} />
