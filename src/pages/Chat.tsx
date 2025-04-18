@@ -20,7 +20,7 @@ import {
 } from "firebase/firestore";
 import ConfirmModal from "../components/ConfirmModal";
 
-const PROVIDERS = ["OpenAI", "Gemini"];
+const PROVIDERS = ["OpenAI", "Gemini", "DALL-E"];
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -144,6 +144,36 @@ export default function Chat() {
         const data = await response.json();
         aiResponse =
           data.candidates?.[0]?.content?.parts?.[0]?.text || "Er ging iets mis met Gemini.";
+      }
+      if (provider === "DALL-E") {
+        const dalleRes = await fetch("https://api.openai.com/v1/images/generations", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            prompt: input,
+            n: 1,
+            size: "512x512", // of 1024x1024
+          }),
+        });
+      
+        const dalleData = await dalleRes.json();
+        const imageUrl = dalleData.data?.[0]?.url;
+      
+        if (imageUrl) {
+          setMessages((prev) => [
+            ...prev,
+            { sender: "ai", content: `<img src="${imageUrl}" alt="gegenereerde afbeelding" class="rounded-xl max-w-xs shadow" />` },
+          ]);
+          await addMessage(chatId, "ai", imageUrl); // of sla als type 'image' op
+        } else {
+          setMessages((prev) => [
+            ...prev,
+            { sender: "ai", content: "Er is iets misgegaan bij het genereren van de afbeelding." },
+          ]);
+        }
       }
 
       setMessages((prev) => [...prev, { sender: "ai", content: aiResponse }]);
@@ -301,28 +331,46 @@ export default function Chat() {
           Chat met: <span className="font-semibold">{provider}</span>
         </div>
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={`px-4 py-2 my-1 rounded-xl shadow max-w-md ${
-                msg.sender === "user"
-                  ? "bg-impactTurquoise text-white self-end ml-auto"
-                  : "bg-white text-gray-800 self-start mr-auto"
-              }`}
-            >
-              <div className="whitespace-pre-wrap">
-  {msg.content.split("```").map((block, i) =>
-    i % 2 === 1 ? (
-      <pre key={i} className="bg-gray-100 text-sm p-3 rounded-md overflow-auto text-black font-mono mb-2">
-        {block.trim()}
-      </pre>
-    ) : (
-      <span key={i}>{block}</span>
-    )
-  )}
-</div>
-            </div>
-          ))}
+        {messages.map((msg, index) => (
+  <div
+    key={index}
+    className={`px-4 py-2 my-1 rounded-xl shadow max-w-md break-words ${
+      msg.sender === "user"
+        ? "bg-impactTurquoise text-white self-end ml-auto"
+        : "bg-white text-gray-800 self-start mr-auto"
+    }`}
+  >
+    {/* Als het een DALL-E afbeelding is */}
+    {/* Controleer of het een afbeelding is (img tag of URL) */}
+{msg.content?.startsWith("<img") ? (
+  <div
+    className="max-w-xs rounded-xl shadow"
+    dangerouslySetInnerHTML={{ __html: msg.content }}
+  />
+) : msg.content?.startsWith("http") && msg.content.includes("openai.com") ? (
+  <img
+    src={msg.content}
+    alt="Gegenereerde afbeelding"
+    className="rounded-xl max-w-xs shadow"
+  />
+) : (
+  <div className="whitespace-pre-wrap">
+    {msg.content.split("```").map((block, i) =>
+      i % 2 === 1 ? (
+        <pre
+          key={i}
+          className="bg-gray-100 text-sm p-3 rounded-md overflow-auto text-black font-mono mb-2"
+        >
+          {block.trim()}
+        </pre>
+      ) : (
+        <span key={i}>{block}</span>
+      )
+    )}
+  </div>
+)}
+  </div>
+))}
           <div ref={chatEndRef} />
         </div>
 
