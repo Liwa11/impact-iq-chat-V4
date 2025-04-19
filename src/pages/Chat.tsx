@@ -125,7 +125,7 @@ export default function Chat() {
         });
 
         const data = await response.json();
-        aiResponse = data.choices?.[0]?.message?.content || "Er ging iets mis met OpenAI.";
+        aiResponse = data.choices?.[0]?.message?.content || "Something went wrong with OpenAI.";
 
       } else if (provider === "Gemini") {
         const response = await fetch(
@@ -143,7 +143,7 @@ export default function Chat() {
 
         const data = await response.json();
         aiResponse =
-          data.candidates?.[0]?.content?.parts?.[0]?.text || "Er ging iets mis met Gemini.";
+          data.candidates?.[0]?.content?.parts?.[0]?.text || "Something went wrong with Gemini.";
       }
       if (provider === "DALL-E") {
         const dalleRes = await fetch("https://api.openai.com/v1/images/generations", {
@@ -155,7 +155,7 @@ export default function Chat() {
           body: JSON.stringify({
             prompt: input,
             n: 1,
-            size: "512x512", // of 1024x1024
+            size: "512x512",
           }),
         });
       
@@ -163,23 +163,25 @@ export default function Chat() {
         const imageUrl = dalleData.data?.[0]?.url;
       
         if (imageUrl) {
+          const imgTag = `<img src="${imageUrl}" alt="Generated Image" class="rounded-xl max-w-xs shadow" />`;
+      
           setMessages((prev) => [
             ...prev,
-            { sender: "ai", content: `<img src="${imageUrl}" alt="gegenereerde afbeelding" class="rounded-xl max-w-xs shadow" />` },
+            { sender: "ai", content: imgTag },
           ]);
-          await addMessage(chatId, "ai", imageUrl); // of sla als type 'image' op
+      
+          await addMessage(chatId, "ai", imgTag); // HTML-tag opslaan!
         } else {
-          setMessages((prev) => [
-            ...prev,
-            { sender: "ai", content: "Er is iets misgegaan bij het genereren van de afbeelding." },
-          ]);
+          const errorMsg = "Something went wrong with DALL-E.";
+          setMessages((prev) => [...prev, { sender: "ai", content: errorMsg }]);
+          await addMessage(chatId, "ai", errorMsg);
         }
       }
 
       setMessages((prev) => [...prev, { sender: "ai", content: aiResponse }]);
       await addMessage(chatId, "ai", aiResponse);
     } catch (err) {
-      setMessages((prev) => [...prev, { sender: "ai", content: "Er is een fout opgetreden bij het ophalen van het AI-antwoord." }]);
+      setMessages((prev) => [...prev, { sender: "ai", content: "An error occured while retrieving the I response." }]);
     }
   };
 
@@ -350,7 +352,7 @@ export default function Chat() {
 ) : msg.content?.startsWith("http") && msg.content.includes("openai.com") ? (
   <img
     src={msg.content}
-    alt="Gegenereerde afbeelding"
+    alt="Generated Image"
     className="rounded-xl max-w-xs shadow"
   />
 ) : (
